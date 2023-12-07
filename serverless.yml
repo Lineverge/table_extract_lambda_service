@@ -1,0 +1,34 @@
+service: autoload-extract-dataframes-from-pdf
+frameworkVersion: "3"
+provider:
+  name: aws
+  runtime: java21
+  memorySize: 2048
+  timeout: 300
+  stage: dev
+  region: us-east-1
+  environment:
+    HOSTNAME: "*"
+    BUCKET_FILES: autoload-test-files
+    BUCKET_PICKLES: autoload-test-pickles
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+          Resource:
+            - "arn:aws:dynamodb:us-east-1:697748500942:table/AutoloadFile"
+            - "arn:aws:dynamodb:us-east-1:697748500942:table/AutoloadDataFrame"
+        - Effect: Allow
+          Action:
+            - "s3:*"
+          Resource:
+            - "arn:aws:s3:::autoload-test-files/*"
+            - "arn:aws:s3:::autoload-test-pickles/*"
+
+functions:
+  call:
+    handler: com.extractor.Handler
